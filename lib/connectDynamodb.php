@@ -1,8 +1,9 @@
 <?php
-use Aws\DynamoDb\DynamoDbClient;
 
 require_once '/etc/yolo-bear-server-config.php';
 require_once ROOT.'/lib/aws.phar';
+
+use Aws\DynamoDb\DynamoDbClient;
 
 function connectDynamodb() {
 return 	DynamoDbClient::factory(array(
