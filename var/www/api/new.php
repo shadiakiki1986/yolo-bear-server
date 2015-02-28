@@ -31,14 +31,9 @@ if($argc>1) {
 	$tp=$argv[2];
 	$td=$argv[3];
 } else {
-	// http://stackoverflow.com/a/23810374
-	if(isset($_SERVER["CONTENT_TYPE"]) && strpos($_SERVER["CONTENT_TYPE"], "application/json") !== false) {
-	    $_POST = array_merge($_POST, (array) json_decode(trim(file_get_contents('php://input')), true));
-	}
-
-	$tn=$_POST["tournamentName"];
-	$tp=$_POST["tournamentPassword"];
-	$td=$_POST["tournamentData"];
+	$tn=$_GET["tournamentName"];
+	$tp=$_GET["tournamentPassword"];
+	$td=$_GET["tournamentData"];
 }
 
 require_once '/etc/yolo-bear-server-config.php';
