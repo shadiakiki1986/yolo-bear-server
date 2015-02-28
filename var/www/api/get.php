@@ -23,6 +23,7 @@ header("Access-Control-Allow-Origin: *");
 */
 
 require_once '/etc/yolo-bear-server-config.php';
+require_once 'aws.phar';
 require_once ROOT.'/lib/connectDynamodb.php';
 
 if($argc==2) {

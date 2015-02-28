@@ -1,7 +1,6 @@
 <?php
 
 require_once '/etc/yolo-bear-server-config.php';
-require_once ROOT.'/lib/aws.phar';
 
 use Aws\DynamoDb\DynamoDbClient;
 

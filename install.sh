@@ -19,5 +19,5 @@ vim $APP_DIR/www/js/config.js
 # AWS php SDK
 wget "https://github.com/aws/aws-sdk-php/releases/download/2.7.9/aws.phar" -O /usr/share/php5/aws.phar # not sure why curl downloads only the first 300 bytes and stops
 # There seems to be a bug in the aws.phar file... it cannot find itself unless a 2nd copy is put next to the caller script
-ln -s /usr/share/php5/aws.phar $INSTALL_DIR/lib
+ln -s /usr/share/php5/aws.phar $INSTALL_DIR/var/www/api/
 
