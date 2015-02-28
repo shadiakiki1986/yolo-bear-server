@@ -30,6 +30,11 @@ if($argc>1) {
 	$tn=$argv[1];
 	$tp=$argv[2];
 } else {
+	// http://stackoverflow.com/a/23810374
+	if(isset($_SERVER["CONTENT_TYPE"]) && strpos($_SERVER["CONTENT_TYPE"], "application/json") !== false) {
+	    $_POST = array_merge($_POST, (array) json_decode(trim(file_get_contents('php://input')), true));
+	}
+
 	$tn=$_POST["tournamentName"];
 	$tp=$_POST["tournamentPassword"];
 }
