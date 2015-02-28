@@ -29,7 +29,7 @@ require_once ROOT.'/lib/connectDynamodb.php';
 if($argc==2) {
 	$tn=$argv[1];
 } else {
-	$tn=$_GET["tn"];
+	$tn=$_GET["tournamentName"];
 }
 
 if($tn=="") {
