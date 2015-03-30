@@ -27,8 +27,8 @@ header("Pragma: no-cache");
 */
 
 if($argc>1) {
-	$tn=$argv[1];
-	$tp=$argv[2];
+	$pid=$argv[1];
+	$nick=$argv[2];
 } else {
 	$pid=$_GET["peerId"];
 	$nick=$_GET["nick"];
