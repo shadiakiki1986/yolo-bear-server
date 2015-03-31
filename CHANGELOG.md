@@ -1,4 +1,8 @@
 # V 0.0.0
+## 2015-03-31
+* putNick.php was changed to POST
+** was very tricky to get client-side angular post work with php angular post and cors enabled
+
 ## 2015-03-30
 * added yolo-bear-users table in dynamodb + putNick.php to api + dropStaleNick.php to scripts
 * added listNick.php
