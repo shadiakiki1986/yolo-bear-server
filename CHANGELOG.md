@@ -1,4 +1,7 @@
 # V 0.0.0
+##2015-04-01
+* added email/password to protect a nickname... have yet to test this
+
 ## 2015-03-31
 * putNick.php was changed to POST
 ** was very tricky to get client-side angular post work with php angular post and cors enabled

@@ -11,3 +11,10 @@ define("ROOT", "/home/shadi/Development/yolo-bear-server");
 define('AWS_KEY','abcdefghi');
 define('AWS_SECRET','abcdefghi');
 define('AWS_REGION','abcdefghi');
+
+# Mailgun key and domain
+define('MAILGUN_KEY','abcdef');
+define('MAILGUN_DOMAIN','abcdef.mailgun.org');
+define('MAILGUN_FROM','Zboota <postmaster@abcdef.mailgun.org>');
+define('MAILGUN_PUBLIC_KEY','pubkey-abcdef');
+
