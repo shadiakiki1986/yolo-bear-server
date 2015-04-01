@@ -13,6 +13,8 @@ require_once 'aws.phar';
 require_once ROOT.'/lib/connectDynamodb.php';
 
 $client=connectDynamoDb();
+
+# identify nicknames more than 1 day old and that are not protected
 $un=$client->getIterator('Scan',array(
     'TableName' => 'yolo-bear-users',
     'ScanFilter' => array(
@@ -21,13 +23,20 @@ $un=$client->getIterator('Scan',array(
 		array('S' => date("Y-m-d")) # date("Y-m-d",strtotime('-30 days'))
 	    ),
 	    'ComparisonOperator' => 'LT'
+	),
+	'email0' => array(
+	    'AttributeValueList' => array(
+		array('S' => "")
+	    ),
+	    'ComparisonOperator' => 'NE'
 	)
+
     )
 ));
 $un=iterator_to_array($un);
 
 if(count($un)==0) {
-	echo "No stale users in yolo-bear-users table.\n";
+	echo "No stale unprotected users in yolo-bear-users table.\n";
 } else {
 
 	foreach ($un as $item) {
