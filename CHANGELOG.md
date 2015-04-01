@@ -1,6 +1,8 @@
 # V 0.0.0
 ##2015-04-01
 * added email/password to protect a nickname... have yet to test this
+* split out nickname from email registration
+** took me all day to realize how bad of a design that was
 
 ## 2015-03-31
 * putNick.php was changed to POST
