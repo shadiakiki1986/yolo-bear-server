@@ -60,7 +60,7 @@ $phpArray=array();
 foreach($ud['Items'] as $v) {
 	$v2=array_filter($ud2,function($x) use($v) { return $x['peerId']['S']==$v['peerId']['S'] && $x['nick']['S']==$v['nick']['S']; });
 	$v3="";
-	if(count($v2)>1) { throw new Exception("WTF"); } else if(count($v2)>0) { $v3=$v2[0]['email0']['S']; }
+	if(count($v2)>1) { throw new Exception("WTF"); } else if(count($v2)>0) { $v3=array_values($v2)[0]['email0']['S']; }
 	$phpArray[$v['peerId']['S']]=array('nick'=>$v['nick']['S'],'email0'=>$v3);
 }
 
