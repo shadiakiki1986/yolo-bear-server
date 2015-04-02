@@ -11,16 +11,16 @@ header("Pragma: no-cache");
  Adds/Updates a yolo-bear user nickname stored on the server
 
  USAGE
-	CLI	php putEmail.php [email] [password (leave empty if new entry)] [nickname] [metaData]
+	CLI	php putEmail.php [email] [password (leave empty if new entry)] [nickname] [peer id] [metaData]
 
-		php putEmail.php "shadiakiki1986@gmail.com" "" "" "" # registering new user wihtout any special information
-		php putEmail.php "shadiakiki1986@gmail.com" "abcdef" "shadi" "" # update nick info
+		php putEmail.php "shadiakiki1986@gmail.com" "" "" "" "" # registering new user wihtout any special information
+		php putEmail.php "shadiakiki1986@gmail.com" "abcdef" "shadi" "" "" # update nick info
 
 	AJAX
 		 $.ajax({
 		    url:"http://shadi.ly/yolo-bear-server/api/putEmail.php",
 		    type: 'POST',
-		    data: {email0:'shadiakiki1986@gmail.com'",pwd:'',nick:'',metaD:''},
+		    data: {email0:'shadiakiki1986@gmail.com'",pwd:'',nick:'',peerId:'',metaD:''},
 		    success: function (data) {
 			console.log(data);
 		    },
@@ -35,7 +35,8 @@ if($argc>1) {
 	$email0=$argv[1];
 	$pwd=$argv[2];
 	$nick=$argv[3];
-	$metaD=$argv[4];
+	$peerId=$argv[4];
+	$metaD=$argv[5];
 } else {
 	// Normally, the following would have been:
 	// $peerId=$_POST["peerId"];
@@ -49,6 +50,7 @@ if($argc>1) {
 	$email0 = $request['email0']; # I could have just used "email" instead of "email0". "email" is not a reserved word in dynamodb, but I'm using "email0" anyway just in case it becomes a reserved word later
 	$pwd = $request['pwd'];
 	$nick = $request['nick'];
+	$peerId = $request['peerId'];
 	$metaD = $request['metaD'];
 }
 
@@ -88,9 +90,11 @@ try {
 		"email0"=>array('S'=>$email0),
 		"pwd"=>array('S'=>$pwd),
 		"nick"=>array('S'=>$nick),
+		"peerId"=>array('S'=>$peerId),
 		"metaD"=>array('S'=>$metaD)
 	);
 	if($nick=="") unset($piv['nick']);
+	if($peerId=="") unset($piv['peerId']);
 	if($metaD=="") unset($piv['metaD']);
 	$client->putItem(array(
 	    'TableName' => 'yolo-bear-users2',

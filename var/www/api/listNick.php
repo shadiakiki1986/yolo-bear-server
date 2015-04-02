@@ -42,8 +42,26 @@ if(count($ud['Items'])==0) {
 	return;
 }
 
-// convert $ud to regular php array
+// retrieve registered addresses
+$ud2=$ddb->scan(array(
+    'TableName' => 'yolo-bear-users2',
+    'AttributesToGet' => array('email0','nick','peerId'),
+    'ScanFilter' => array(
+        'peerId' => array(
+               'ComparisonOperator' => 'NOT_NULL'
+        )
+   )
+));
+$ud2=iterator_to_array($ud2);
+$ud2=$ud2['Items'];
+
+// convert $ud to regular php array, and merge with entryes from ud2 to show "registered" nicks
 $phpArray=array();
-foreach($ud['Items'] as $v) $phpArray[$v['peerId']['S']]=$v['nick']['S'];
+foreach($ud['Items'] as $v) {
+	$v2=array_filter($ud2,function($x) use($v) { return $x['peerId']['S']==$v['peerId']['S'] && $x['nick']['S']==$v['nick']['S']; });
+	$v3="";
+	if(count($v2)>1) { throw new Exception("WTF"); } else if(count($v2)>0) { $v3=$v2[0]['email0']['S']; }
+	$phpArray[$v['peerId']['S']]=array('nick'=>$v['nick']['S'],'email0'=>$v3);
+}
 
 echo json_encode($phpArray);

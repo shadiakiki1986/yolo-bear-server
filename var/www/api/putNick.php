@@ -54,18 +54,21 @@ require_once 'aws.phar';
 require_once ROOT.'/lib/connectDynamodb.php';
 
 try {
-	if($peerId==""||$nick==""||$pwd=="") { throw new Exception("Please enter the PEER JS ID, nickname, and password.\n"); }
+	if($peerId==""||$pwd=="") { throw new Exception("Please enter the PEER JS ID and password.\n"); }
 
 	$client=connectDynamoDb();
 
-	$client->putItem(array(
-	    'TableName' => 'yolo-bear-users',
-	    'Item' => array(
+	$piv=array(
 		"peerId"=>array('S'=>$peerId),
 		"nick"=>array('S'=>$nick),
 		"pwd"=>array('S'=>$pwd),
 		"lastUse"=>array('S'=>date("Y-m-d"))
-	)));
+	);
+	if($nick=="") unset($piv['nick']);
+	$client->putItem(array(
+	    'TableName' => 'yolo-bear-users',
+	    'Item' => $piv
+	));
 
 	// done
 	echo "{}";

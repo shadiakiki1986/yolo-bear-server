@@ -1,5 +1,11 @@
 # V 0.0.0
-##2015-04-01
+## 2015-04-02
+* allowing empty nicknames
+* dropStale was not properly filtering for unprotected nicknames
+* putEmail now also puts peerId (to show which nicknames are verified by emails)
+* listNick now merges the nicknames with the verified email addresses
+
+## 2015-04-01
 * added email/password to protect a nickname... have yet to test this
 * split out nickname from email registration
 ** took me all day to realize how bad of a design that was

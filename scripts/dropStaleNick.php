@@ -25,10 +25,7 @@ $un=$client->getIterator('Scan',array(
 	    'ComparisonOperator' => 'LT'
 	),
 	'email0' => array(
-	    'AttributeValueList' => array(
-		array('S' => "")
-	    ),
-	    'ComparisonOperator' => 'NE'
+	    'ComparisonOperator' => 'NULL'
 	)
 
     )
