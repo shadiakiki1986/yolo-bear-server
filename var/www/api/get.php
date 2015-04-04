@@ -10,6 +10,7 @@ header("Pragma: no-cache");
  Usage:
  	CLI
 		php get.php 'safra 2014'
+		php get.php 'test tournament' 'html'
 
  	Ajax
 		$.ajax({
@@ -29,7 +30,7 @@ require_once '/etc/yolo-bear-server-config.php';
 require_once 'aws.phar';
 require_once ROOT.'/lib/connectDynamodb.php';
 
-if($argc==2) {
+if($argc>1) {
 	$tn=$argv[1];
 	$format=$argv[2];
 } else {
@@ -43,7 +44,7 @@ if($tn=="") {
 }
 
 if($format=="") $format="json";
-if(!array_in($format,array("json","html"))) die("Unsupported format. Please use: html, json");
+if(!in_array($format,array("json","html"))) die("Unsupported format. Please use: html, json");
 
 # retrieval from dynamo db table
 $ddb=connectDynamoDb();
@@ -64,11 +65,13 @@ $phpArray=array();
 foreach($ud['Item'] as $k2=>$v2) $phpArray[$k2]=$v2['S'];
 
 // supporting function
-function teamById($teamId) use($phpArray) {
-	$t1=array_filter(function($t) use($teamId) { return $t['id']==$team1Id; }, $phpArray['tournamentData']['teams']);
+function teamById($teamId, $phpArray) {
+	$t1=array_filter($phpArray['tournamentData']['teams'], function($t) use($teamId) { return $t['id']==$teamId; });
 	if(count($t1)!=1) die("Error identifying team in game"); 
-	return $t1[0];
+	return array_values($t1)[0];
 }
+
+if($format=="html") $phpArray['tournamentData']=json_decode($phpArray['tournamentData'],true);
 
 // output
 switch($format) {
@@ -76,17 +79,17 @@ switch($format) {
 		echo json_encode($phpArray);
 		break;
 	case "html":
-		echo "<h1>".$phpArray['tournamentName']."</h1>";
-		echo "<table><caption>Teams (".count($phpArray['tournamentData']['teams'])."</caption>";
-		foreach($t in $phpArray['tournamentData']['teams']) echo "<tr><td>".$t['name']."</td></tr>";
+		echo "<h1>Yolo-bear tournament: ".$phpArray['tournamentName']."</h1>";
+		echo "<table border=1><caption>Teams (".count($phpArray['tournamentData']['teams']).")</caption>";
+		foreach($phpArray['tournamentData']['teams'] as $t) echo "<tr><td>".$t['name']."</td></tr>";
 		echo "</table>";
-		echo "<table><caption>Players (".count($phpArray['tournamentData']['players'])."</caption>";
-		foreach($p in $phpArray['tournamentData']['players']) echo "<tr><td>".$p['name']."</td></tr>";
+		echo "<table border=1><caption>Players (".count($phpArray['tournamentData']['players']).")</caption>";
+		foreach($phpArray['tournamentData']['players'] as $p) echo "<tr><td>".$p['name']."</td></tr>";
 		echo "</table>";
-		echo "<table><caption>Games (".count($phpArray['tournamentData']['games'])."</caption>";
-		foreach($g in $phpArray['tournamentData']['games']) {
-			$t1=teamById($g['team1Id']);
-			$t2=teamById($g['team2Id']);
+		echo "<table border=1><caption>Games (".count($phpArray['tournamentData']['games']).")</caption>";
+		foreach($phpArray['tournamentData']['games'] as $g) {
+			$t1=teamById($g['team1Id'],$phpArray);
+			$t2=teamById($g['team2Id'],$phpArray);
 			echo "<tr><td>".$t1['name']." x ".$t2['name']."(".$g['state'].")</td></tr>";
 		}
 		echo "</table>";
