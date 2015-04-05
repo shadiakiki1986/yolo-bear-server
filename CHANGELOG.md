@@ -1,4 +1,7 @@
 # V 0.0.0
+## 2015-04-05
+* finished first draft of format=html for get.php
+
 ## 2015-04-03
 * adding format=html to get.php in order to share tournament data to social media
 
