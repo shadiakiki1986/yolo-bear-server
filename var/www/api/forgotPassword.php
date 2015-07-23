@@ -46,7 +46,7 @@ if(isset($argc)) {
   $email0 = $request['email0']; # I could have just used "email" instead of "email0". "email" is not a reserved word in dynamodb, but I'm using "email0" anyway just in case it becomes a reserved word later
 }
 
-require_once '/etc/yolo-bear-server-config.php';
+require_once dirname(__FILE__).'/../../../config.php';
 require_once ROOT.'/lib/connectDynamodb.php';
 
 try {

@@ -1,6 +1,6 @@
 <?php
 
-require_once '/etc/yolo-bear-server-config.php';
+require_once dirname(__FILE__).'/../config.php';
 
 function mailSend($to,$subj,$body) {
 	$curl = curl_init();

@@ -26,7 +26,7 @@ header("Pragma: no-cache");
 		 });
 */
 
-require_once '/etc/yolo-bear-server-config.php';
+require_once dirname(__FILE__).'/../../../config.php';
 require_once ROOT.'/lib/connectDynamodb.php';
 
 if($argc>1) {

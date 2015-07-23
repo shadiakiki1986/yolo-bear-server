@@ -54,7 +54,7 @@ if($argc>1) {
 	$metaD = $request['metaD'];
 }
 
-require_once '/etc/yolo-bear-server-config.php';
+require_once dirname(__FILE__).'/../../../config.php';
 require_once ROOT.'/lib/connectDynamodb.php';
 require_once ROOT.'/lib/mailSend.php';
 require_once ROOT.'/lib/mailValidate.php';
