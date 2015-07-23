@@ -48,6 +48,8 @@ if(isset($argc)) {
 
 require_once dirname(__FILE__).'/../../../config.php';
 require_once ROOT.'/lib/connectDynamodb.php';
+require_once ROOT.'/lib/mailSend.php';
+require_once ROOT.'/lib/mailValidate.php';
 
 try {
   if($email0=="") { throw new Exception("Please enter the email.\n"); }
@@ -63,13 +65,20 @@ try {
 
   // if already existing
   if(count($entry)>0) {
-    // http://stackoverflow.com/a/5335311
-    $to      = 'nobody@example.com';
-    $subject = 'Yolo Bear forgotten password';
-    $message = 'Your forgotten password is '.$entry['pwd']['S'];
-    $headers = 'From: noreply@yolo-bear.genesis.akikieng.com' . "\r\n" .
-      'X-Mailer: PHP/' . phpversion();
-    mail($to, $subject, $message, $headers);
+    // check if valid before sending email
+    if(!mailValidate($email0)) {
+        throw new Exception("Invalid email {$email0}.");
+    }
+
+    if(!mailSend($email0,
+        "Yolo Bear forgotten password",
+        'Your forgotten password is '.$entry['pwd']['S']
+    )) {
+        throw new Exception("Failed to send email to {$email0}.");
+    } else {
+        echo json_encode(array('warning'=>"An email has been sent to you with the password to use. Please check your junk folder if the email is not in your inbox."));
+        return;
+    }
   } else {
     throw new Exception("Invalid email {$email0}.");
   }
