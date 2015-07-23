@@ -48,7 +48,6 @@ if($argc>1) {
 }
 
 require_once '/etc/yolo-bear-server-config.php';
-require_once 'aws.phar';
 require_once ROOT.'/lib/connectDynamodb.php';
 
 try {

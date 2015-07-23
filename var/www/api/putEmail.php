@@ -55,7 +55,6 @@ if($argc>1) {
 }
 
 require_once '/etc/yolo-bear-server-config.php';
-require_once 'aws.phar';
 require_once ROOT.'/lib/connectDynamodb.php';
 require_once ROOT.'/lib/mailSend.php';
 require_once ROOT.'/lib/mailValidate.php';

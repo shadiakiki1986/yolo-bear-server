@@ -10,7 +10,9 @@
 =Steps=
 * apt-get update
 * apt-get install git
-* git clone https://shadiakiki1986@bitbucket.org/shadiakiki1986/yolo-bear-server $INSTALL_DIR # will require password
+* git clone https://shadiakiki1986@bitbucket.org/shadiakiki1986/yolo-bear-server
+* cd yolo-bear-server
+* composer install
 * Run install.sh
 
 =Uninstall=
