@@ -1,11 +1,11 @@
 <?php
 
-# Copy this file to /etc/yolo-bear-server-config.php
+# Copy this file to config.php in the root installed folder
 # and edit it with the proper parameter values
-# yolo-bear-server/install.sh will already copy it and propose editing
 
 # Root directory of installation of yolo-bear-server
-define("ROOT", "/home/shadi/Development/yolo-bear-server");
+define("ROOT", dirname(__FILE__));
+require ROOT.'/vendor/autoload.php'; #  if this line throw an error, I probably forgot to run composer install
 
 # AWS connection information
 define('AWS_KEY','abcdefghi');
