@@ -1,0 +1,20 @@
+{
+    "name":"shadiakiki1986/yolo-bear-server",
+    "description":"Server-side for yolo-bear app",
+    "keywords":["yolo-bear"],
+    "type":"project",
+    "license":"WTFPL",
+    "authors":[
+        {
+            "name":"Shadi Akiki",
+            "email":"shadiakiki1986@gmail.com"
+        }
+    ],
+    "homepage": "https://github.com/shadiakiki1986/yolo-bear-server",
+    "minimum-stability": "stable",
+    "require":{
+        "php":">=5.3.5",
+        "aws/aws-sdk-php": ">=2.7.27",
+        "phpmailer/phpmailer": "~5.2"
+    }
+}
