@@ -5,11 +5,16 @@ require_once dirname(__FILE__).'/../config.php';
 use Aws\DynamoDb\DynamoDbClient;
 
 function connectDynamodb() {
-return 	DynamoDbClient::factory(array(
+  $neededVars=array("AWS_KEY", "AWS_SECRET", "AWS_REGION");
+  foreach($neededVars as $nv) if(!defined($nv)) throw new Exception("Please define the $nv variable in the config file");
+
+  return DynamoDbClient::factory(array(
     'version' => 'latest',
-    'key' => AWS_KEY, # check config file
-    'secret'  => AWS_SECRET,
-    'region'  => AWS_REGION
-));
+    'region'  => AWS_REGION,
+    'credentials' => array(
+      'key' => AWS_KEY, # check config file
+      'secret'  => AWS_SECRET,
+    )
+  ));
 }
 
