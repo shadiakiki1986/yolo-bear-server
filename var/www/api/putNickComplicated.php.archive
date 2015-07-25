@@ -1,0 +1,216 @@
+<?php
+
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Access-Control-Allow-Origin");
+header("Access-Control-Allow-Methods: PUT, GET, POST, DELETE, OPTIONS");
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
+
+/*
+ Adds/Updates a yolo-bear user nickname stored on the server
+
+ USAGE
+	CLI	php putNick.php [peer js ID] [nickname] [peer ID session password] [user email to protect nick (leave empty if undesired)] [user password that is protecting nick (only if overriding an existing entry; leave empty if not protecting nick, new entry, or not overriding existing entry)]
+
+		php putNick.php "j01gtoe9ekuwstt9" "shadi" "123456" "" "" # unprotected nick
+		php putNick.php "j01gtoe9ekuwstt9" "shadi" "123456" "shadiakiki1986@gmail.com" "" # request protection of nick
+		php putNick.php "j01gtoe9ekuwstt9" "shadi22" "123456" "shadiakiki1986@gmail.com" "abcdef" # update nick info
+
+	AJAX
+		 $.ajax({
+		    url:"http://shadi.ly/yolo-bear-server/api/putNick.php",
+		    type: 'POST',
+		    data: {peerId:'j01gtoe9ekuwstt9',nick:'shadi',pwd:'a1b12h',email0:'shadiakiki1986@gmail.com'",pwd2:''},
+		    success: function (data) {
+			console.log(data);
+		    },
+		    error: function (jqXHR, ts, et) {
+			console.log("error", ts, et);
+		    }
+		 });
+*/
+
+//if(defined("argc") && $argc>1) {
+if($argc>1) {
+	$peerId=$argv[1];
+	$nick=$argv[2];
+	$pwd=$argv[3];
+	$email0=$argv[4];
+	$pwd2=$argv[5];
+} else {
+	// Normally, the following would have been:
+	// $peerId=$_POST["peerId"];
+	// $nick=$_POST["nick"];
+	// $pwd=$_POST["pwd"];
+	// but due to some angular-php post shit
+	// http://stackoverflow.com/a/15485690
+	// it has to be as such
+	$postdata = file_get_contents("php://input");
+	$request = json_decode($postdata,true);
+	$peerId = $request['peerId'];
+	$nick = $request['nick'];
+	$pwd = $request['pwd'];
+	$email0 = $request['email0']; # I could have just used "email" instead of "email0". "email" is not a reserved word in dynamodb, but I'm using "email0" anyway just in case it becomes a reserved word later
+	$pwd2 = $request['pwd2'];
+}
+
+require_once dirname(__FILE__).'/../../../config.php';
+require_once ROOT.'/lib/connectDynamodb.php';
+require_once ROOT.'/lib/mailSend.php';
+require_once ROOT.'/lib/mailValidate.php';
+
+try {
+	if($peerId==""||$nick==""||$pwd=="") { throw new Exception("Please enter the PEER JS ID, nickname, and password.\n"); }
+
+	$client=connectDynamoDb();
+
+	// Identify if nick already exists
+	/*$entry=$client->getItem(array(
+	    'TableName' => 'yolo-bear-users',
+	    'Key' => array( 'nick' => array('S' => $nick) )
+	));
+	$entry=(array)$entry['Item'];*/
+	$entry=$client->getIterator('Scan',array(
+	    'TableName' => 'yolo-bear-users',
+	    'ScanFilter' => array( 'nick' => array( 'AttributeValueList' => array( array('S' => $nick)), 'ComparisonOperator' => 'EQ' ) )
+	));
+	$entry=iterator_to_array($entry);
+
+	// state variables
+	$isNewEmail=false;
+	$isNotNewEmail=false;
+
+	// if already existing
+	if(count($entry)>0) {
+		foreach($entry as $ei) {
+//var_dump("exists",$entry);
+			// if is protected
+			if(array_key_exists('email0',$ei) && array_key_exists('pwd2',$ei) && $ei['email0']['S']!="" && $ei['pwd2']['S']!="") {
+//var_dump("is protected",$pwd2,$ei['pwd2']['S']);
+				// if updating, need to have the correct pwd2
+				if($email0!='' && $pwd2!='') {
+					if($ei['pwd2']['S']!=$pwd2) {
+						throw new Exception("Wrong nickname protection password.");
+					} else {
+						// drop old peer id
+						$client->deleteItem(array(
+						    'TableName' => 'yolo-bear-users',
+						    'Key' => array( 'peerId' => array('S' => $ei['peerId']['S']) )
+						));
+
+						// set state variable
+						$isNotNewEmail=true;
+
+						// proceed
+					}
+				} else {
+					// if unintentionally overwriting
+					echo json_encode(array("warning"=>"Nickname {$nick} already protected by someone else."));
+					return;
+				}
+			} else {
+//var_dump("is not protected",$pwd,$ei['pwd']['S']);
+				if($peerId==$ei['peerId']['S']) {
+					// check password (this is a session password)
+					if(array_key_exists('pwd',$ei) && $ei['pwd']['S']!=$pwd) {
+						throw new Exception("Nickname $nick is already taken for this peerId."); // this actually means that the wrong password was given for the peerId
+					} else {
+						if($email0!='') {
+							$isNewEmail=true;
+						}
+						// proceed
+					}
+				} else {
+					// do nothing
+				}
+			}
+		}
+	} else {
+//var_dump("new nick",$email0);
+		// if new nick
+		// do nothing
+	}
+
+	// if requesting protection of this new nick
+	if($email0!='') {
+		// Identify if email already exists
+		$entry2=$client->getIterator('Scan',array(
+		    'TableName' => 'yolo-bear-users',
+		    'ScanFilter' => array( 'email0' => array( 'AttributeValueList' => array(array('S' => $email0)), 'ComparisonOperator' => 'EQ' ) )
+		));
+		$entry2=iterator_to_array($entry2);
+
+		// if reserving several nicks
+		if(count($entry2)>1) {
+			throw new Exception("Reserving several nicknames with the same $email blocks the email being used");
+		} else if(count($entry2)>0) {
+			$entry2=$entry2[0];
+//var_dump("is protected",$pwd2,$entry2['pwd2']['S']);
+			// if updating, need to have the correct pwd2
+			if($pwd2!='') {
+				if($entry2['pwd2']['S']!=$pwd2) {
+					throw new Exception("Wrong nickname protection password.");
+				}
+			} else {
+				throw new Exception("Email already used for nickname ".$entry2['nick']['S']);
+			}
+
+//var_dump("release older nick");
+			// release older nickname reserved by email
+			$client->deleteItem(array(
+			    'TableName' => 'yolo-bear-users',
+			    'Key' => array( 'peerId' => array('S' => $entry2['peerId']['S']) )
+			));
+		} else {
+			if(!$isNotNewEmail) {
+				// set state variable
+				$isNewEmail=true;
+			}
+		}
+	}
+
+	if($isNewEmail) {
+//var_dump("validating email");
+		// check if valid before sending email
+		if(!mailValidate($email0)) {
+			throw new Exception("Invalid email {$email0}.");
+		}
+		// generate random code
+		$pwd2=substr(uniqid(),-5,5);
+	}
+
+	$piv=array(
+		"peerId"=>array('S'=>$peerId),
+		"nick"=>array('S'=>$nick),
+		"pwd"=>array('S'=>$pwd),
+		"email0"=>array('S'=>$email0),
+		"pwd2"=>array('S'=>$pwd2),
+		"lastUse"=>array('S'=>date("Y-m-d"))
+	);
+	if($email0=="") unset($piv["email0"]);
+	if($pwd2=="") unset($piv["pwd2"]);
+//var_dump("piv",$piv,$isNewEmail);
+	$client->putItem(array(
+	    'TableName' => 'yolo-bear-users',
+	    'Item' => $piv));
+
+	if($isNewEmail) {
+		// send email about new nickname protection
+		if(!mailSend($email0,
+			"Yolo-bear registration",
+			"Welcome to Yolo-bear.
+			The password protecting your nickname {$nick} is {$pwd2}."
+		)) {
+			throw new Exception("Failed to send email to {$email0}.");
+		} else {
+			echo json_encode(array('warning'=>"An email has been sent to you with the nickname protective password"));
+			return;
+		}
+	}
+
+	// done
+	echo "{}";
+} catch(Exception $e) {
+	echo json_encode(array('error'=>$e->getMessage()));
+}
